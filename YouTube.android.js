@@ -87,6 +87,9 @@ export default class YouTube extends React.Component {
 
   _backPress = () => {
     if (this.state.fullscreen) {
+      if (this.props.onChangeFullscreen) {
+        this.props.onChangeFullscreen({isFullscreen: false});
+      }
       this.setState({ fullscreen: false });
       return true;
     }
