@@ -1,13 +1,17 @@
 {
   "name": "@leefecu/react-native-youtube",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "A <YouTube/> component for React Native.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": "ken-lee-pushpay/react-native-youtube",
-  "keywords": ["youtube", "react", "react-native"],
+  "keywords": [
+    "youtube",
+    "react",
+    "react-native"
+  ],
   "author": "Param Aggarwal",
   "license": "MIT",
   "bugs": {
@@ -27,7 +31,9 @@
     "android": {
       "packageInstance": "new ReactNativeYouTube()"
     },
-    "assets": ["assets"]
+    "assets": [
+      "assets"
+    ]
   },
   "prettier": {
     "semi": true,
