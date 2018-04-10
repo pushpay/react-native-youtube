@@ -61,6 +61,7 @@ export default class YouTube extends React.Component {
     this.state = {
       moduleMargin: StyleSheet.hairlineWidth * 2,
       fullscreen: props.fullscreen,
+      play: props.play,
     };
   }
 
@@ -79,6 +80,9 @@ export default class YouTube extends React.Component {
     if (nextProps.fullscreen !== this.props.fullscreen) {
       this.setState({ fullscreen: nextProps.fullscreen });
     }
+    if (nextProps.play !== this.state.play) {
+      this.setState({ play: nextProps.play });
+    }
   }
 
   componentWillUnmount() {
@@ -90,7 +94,7 @@ export default class YouTube extends React.Component {
       if (this.props.onChangeFullscreen) {
         this.props.onChangeFullscreen({isFullscreen: false});
       }
-      this.setState({ fullscreen: false });
+      this.setState({ fullscreen: false, play: false });
       return true;
     }
     return false;
@@ -127,6 +131,12 @@ export default class YouTube extends React.Component {
     if (this.state.fullscreen !== isFullscreen) this.setState({ fullscreen: isFullscreen });
     if (this.props.onChangeFullscreen) this.props.onChangeFullscreen(event.nativeEvent);
   };
+
+  setFullScreen (fullscreen) {
+    if (!this.state.fullscreen) {
+      this.setState({ fullscreen });
+    }
+  }
 
   seekTo(seconds) {
     UIManager.dispatchViewManagerCommand(
@@ -192,6 +202,7 @@ export default class YouTube extends React.Component {
             this._nativeComponentRef = component;
           }}
           {...this.props}
+          play={this.state.play}
           fullscreen={this.state.fullscreen}
           style={[styles.module, { margin: this.state.moduleMargin }]}
           onYouTubeError={this._onError}
