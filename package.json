@@ -1,22 +1,23 @@
 {
-  "name": "react-native-youtube",
-  "version": "1.1.0",
+  "name": "@leefecu/react-native-youtube",
+  "version": "1.1.2",
   "description": "A <YouTube/> component for React Native.",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/inProgress-team/react-native-youtube.git"
-  },
-  "keywords": ["youtube", "react", "react-native"],
+  "repository": "ken-lee-pushpay/react-native-youtube",
+  "keywords": [
+    "youtube",
+    "react",
+    "react-native"
+  ],
   "author": "Param Aggarwal",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/inProgress-team/react-native-youtube/issues"
+    "url": "https://github.com/ken-lee-pushpay/react-native-youtube/issues"
   },
-  "homepage": "https://github.com/inProgress-team/react-native-youtube#readme",
+  "homepage": "https://github.com/ken-lee-pushpay/react-native-youtube#readme",
   "dependencies": {
     "prop-types": "^15.5.0"
   },
@@ -30,7 +31,9 @@
     "android": {
       "packageInstance": "new ReactNativeYouTube()"
     },
-    "assets": ["assets"]
+    "assets": [
+      "assets"
+    ]
   },
   "prettier": {
     "semi": true,
