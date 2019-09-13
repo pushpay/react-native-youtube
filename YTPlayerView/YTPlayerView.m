@@ -257,9 +257,17 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
 #pragma mark - Setting the playback rate
 
-- (float)playbackRate {
-  NSString *returnValue = [self stringFromEvaluatingJavaScript:@"player.getPlaybackRate();"];
-  return [returnValue floatValue];
+- (void)getPlaybackRate:(void (^ __nullable)(float playbackRate, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getPlaybackRate();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(0, error);
+            } else {
+                completionHandler([response floatValue], nil);
+            }
+        }
+    }];
 }
 
 - (void)setPlaybackRate:(float)suggestedRate {
@@ -267,20 +275,26 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
   [self evaluateJavaScript:command];
 }
 
-- (NSArray *)availablePlaybackRates {
-  NSString *returnValue =
-      [self stringFromEvaluatingJavaScript:@"player.getAvailablePlaybackRates();"];
-
-  NSData *playbackRateData = [returnValue dataUsingEncoding:NSUTF8StringEncoding];
+- (void)getAvailablePlaybackRates:(void (^ __nullable)(NSArray * __nullable availablePlaybackRates, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getAvailablePlaybackRates();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(nil, error);
+            } else {
+                NSData *playbackRateData = [response dataUsingEncoding:NSUTF8StringEncoding];
   NSError *jsonDeserializationError;
   NSArray *playbackRates = [NSJSONSerialization JSONObjectWithData:playbackRateData
                                                            options:kNilOptions
                                                              error:&jsonDeserializationError];
   if (jsonDeserializationError) {
-    return nil;
+                    completionHandler(nil, jsonDeserializationError);
   }
 
-  return playbackRates;
+                completionHandler(playbackRates, nil);
+            }
+        }
+    }];
 }
 
 #pragma mark - Setting playback behavior for playlists
@@ -299,23 +313,61 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
 #pragma mark - Playback status
 
-- (float)videoLoadedFraction {
-  return [[self stringFromEvaluatingJavaScript:@"player.getVideoLoadedFraction();"] floatValue];
+- (void)getVideoLoadedFraction:(void (^ __nullable)(float videoLoadedFraction, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getVideoLoadedFraction();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(0, error);
+            } else {
+                completionHandler([response floatValue], nil);
+            }
+        }
+    }];
 }
 
-- (YTPlayerState)playerState {
-  NSString *returnValue = [self stringFromEvaluatingJavaScript:@"player.getPlayerState();"];
-  return [YTPlayerView playerStateForString:returnValue];
+- (void)getPlayerState:(void (^ __nullable)(YTPlayerState playerState, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getPlayerState();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(kYTPlayerStateUnknown, error);
+            } else {
+                if ([response isKindOfClass: [NSNumber class]]) {
+                    NSNumber *value = (NSNumber *)response;
+                    response = [value stringValue];
+                }
+                completionHandler([YTPlayerView playerStateForString:response], nil);
+            }
+        }
+    }];
 }
 
-- (float)currentTime {
-  return [[self stringFromEvaluatingJavaScript:@"player.getCurrentTime();"] floatValue];
+- (void)getCurrentTime:(void (^ __nullable)(float currentTime, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getCurrentTime();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(0, error);
+            } else {
+                completionHandler([response floatValue], nil);
+            }
+        }
+    }];
 }
 
 // Playback quality
-- (YTPlaybackQuality)playbackQuality {
-  NSString *qualityValue = [self stringFromEvaluatingJavaScript:@"player.getPlaybackQuality();"];
-  return [YTPlayerView playbackQualityForString:qualityValue];
+- (void)getPlaybackQuality:(void (^ __nullable)(YTPlaybackQuality playbackQuality, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getPlaybackQuality();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(kYTPlaybackQualityUnknown, error);
+            } else {
+                completionHandler([YTPlayerView playbackQualityForString:response], nil);
+            }
+        }
+    }];
 }
 
 - (void)setPlaybackQuality:(YTPlaybackQuality)suggestedQuality {
@@ -326,38 +378,100 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
 #pragma mark - Video information methods
 
-- (NSTimeInterval)duration {
-  return [[self stringFromEvaluatingJavaScript:@"player.getDuration();"] doubleValue];
+- (void)getDuration:(void (^ __nullable)(NSTimeInterval duration, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getDuration();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(0, error);
+            } else {
+                if (response != (id) [NSNull null]) {
+                    completionHandler([response doubleValue], nil);
+                }
+                else {
+                    completionHandler(0, nil);
+                }
+            }
+        }
+    }];
 }
 
-- (NSURL *)videoUrl {
-  return [NSURL URLWithString:[self stringFromEvaluatingJavaScript:@"player.getVideoUrl();"]];
+- (void)getVideoUrl:(void (^ __nullable)(NSURL * __nullable videoUrl, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getVideoUrl();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(nil, error);
+            } else {
+                completionHandler([NSURL URLWithString:response], nil);
+            }
+        }
+    }];
 }
 
-- (NSString *)videoEmbedCode {
-  return [self stringFromEvaluatingJavaScript:@"player.getVideoEmbedCode();"];
+- (void)getVideoEmbedCode:(void (^ __nullable)(NSString * __nullable videoEmbedCode, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getVideoEmbedCode();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(nil, error);
+            } else {
+                completionHandler(response, nil);
+            }
+        }
+    }];
 }
 
 #pragma mark - Playlist methods
 
-- (NSArray *)playlist {
-  NSString *returnValue = [self stringFromEvaluatingJavaScript:@"player.getPlaylist();"];
+- (void)getPlaylist:(void (^ __nullable)(NSArray * __nullable playlist, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getPlaylist();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(nil, error);
+            } else {
 
-  NSData *playlistData = [returnValue dataUsingEncoding:NSUTF8StringEncoding];
+                if ([response isKindOfClass:[NSNull class]]) {
+                    completionHandler(nil, nil);
+                    return;
+                }
+
+                NSArray *videoIds;
+
+                if ([response isKindOfClass:[NSArray class]])
+                {
+                    videoIds = (NSArray *)response;
+                }
+                else
+                {
+                    NSData *playlistData = [response dataUsingEncoding:NSUTF8StringEncoding];
   NSError *jsonDeserializationError;
-  NSArray *videoIds = [NSJSONSerialization JSONObjectWithData:playlistData
+                    videoIds = [NSJSONSerialization JSONObjectWithData:playlistData
                                                       options:kNilOptions
                                                         error:&jsonDeserializationError];
   if (jsonDeserializationError) {
-    return nil;
+                        completionHandler(nil, jsonDeserializationError);
+                    }
   }
 
-  return videoIds;
+                completionHandler(videoIds, nil);
+            }
+        }
+    }];
 }
 
-- (int)playlistIndex {
-  NSString *returnValue = [self stringFromEvaluatingJavaScript:@"player.getPlaylistIndex();"];
-  return [returnValue intValue];
+- (void)getPlaylistIndex:(void (^ __nullable)(int playlistIndex, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getPlaylistIndex();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(0, error);
+            } else {
+                completionHandler([response intValue], nil);
+            }
+        }
+    }];
 }
 
 #pragma mark - Playing a video in a playlist
@@ -378,18 +492,24 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
 
 #pragma mark - Helper methods
 
-- (NSArray *)availableQualityLevels {
-  NSString *returnValue =
-      [self stringFromEvaluatingJavaScript:@"player.getAvailableQualityLevels().toString();"];
-  if(!returnValue) return nil;
-
-  NSArray *rawQualityValues = [returnValue componentsSeparatedByString:@","];
+- (void)getAvailableQualityLevels:(void (^ __nullable)(NSArray * __nullable availableQualityLevels, NSError * __nullable error))completionHandler
+{
+    [self stringFromEvaluatingJavaScript:@"player.getAvailableQualityLevels().toString();" completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            if (error) {
+                completionHandler(nil, error);
+            } else {
+                NSArray *rawQualityValues = [response componentsSeparatedByString:@","];
   NSMutableArray *levels = [[NSMutableArray alloc] init];
   for (NSString *rawQualityValue in rawQualityValues) {
-    YTPlaybackQuality quality = [YTPlayerView playbackQualityForString:rawQualityValue];
+                    YTPlaybackQuality quality = [YTPlayerView playbackQualityForString:rawQualityValue];
     [levels addObject:[NSNumber numberWithInt:quality]];
   }
-  return levels;
+
+                completionHandler(levels, nil);
+            }
+        }
+    }];
 }
 
 #pragma mark - WKNavigationDelegate methods
@@ -850,25 +970,13 @@ NSString static *const kYTPlayerSyndicationRegexPattern = @"^https://tpc.googles
  * Private method for evaluating JavaScript in the WebView.
  *
  * @param jsToExecute The JavaScript code in string format that we want to execute.
- * @return JavaScript response from evaluating code.
  */
-- (NSString *)stringFromEvaluatingJavaScript:(NSString *)jsToExecute {
-  dispatch_semaphore_t sema4 = dispatch_semaphore_create(0);
-    __block NSString *resultString = nil;
-
-    [self.webView evaluateJavaScript:jsToExecute completionHandler:^(id result, NSError *error) {
-        if (error == nil && result != nil) {
-            resultString = [NSString stringWithFormat:@"%@", result];
+- (void)stringFromEvaluatingJavaScript:(NSString *)jsToExecute completionHandler:(void (^ __nullable)(NSString * __nullable response, NSError * __nullable error))completionHandler{
+    [self.webView evaluateJavaScript:jsToExecute completionHandler:^(NSString * _Nullable response, NSError * _Nullable error) {
+        if (completionHandler) {
+            completionHandler(response, error);
         }
-        dispatch_semaphore_signal(sema4);
     }];
-    // WkWebView always calls completion handler on the main thread, so this keeps us from blocking ourselves.
-    // c.f. http://stackoverflow.com/questions/28388197/wkwebview-trying-to-query-javascript-synchronously-from-the-main-thread
-    while (dispatch_semaphore_wait(sema4, DISPATCH_TIME_NOW)) {
-        [[NSRunLoop currentRunLoop] runMode:NSDefaultRunLoopMode
-                                 beforeDate:[NSDate dateWithTimeIntervalSinceNow:10]];
-    }
-    return resultString;
 }
 
 /**
